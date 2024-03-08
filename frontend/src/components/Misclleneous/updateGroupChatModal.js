@@ -2,8 +2,6 @@ import React from 'react';
 
 import {
     Box, 
-    Text, 
-    Avatar,
     IconButton,
     Modal,
     ModalOverlay,
@@ -14,14 +12,14 @@ import {
     ModalFooter,
     Button,
     useDisclosure,
-    Image,
+    // Image,
     Input,
     FormControl,
-    FormLabel,
-    FormErrorMessage,
+    // FormLabel,
+    // FormErrorMessage,
     Spinner
 } from "@chakra-ui/react";
-import { CloseIcon, ViewIcon } from "@chakra-ui/icons";
+import { ViewIcon } from "@chakra-ui/icons";
 import { ChatState } from '../../Context/ChatProvider';
 import { useState } from 'react';
 import { useToast } from '@chakra-ui/react';
@@ -55,6 +53,7 @@ const UpdateGroupChatModal = ({fetchAgain, setFetchAgain}) => {
                 };
                 const url = `/api/chat/${selectedChat._id}/remove/${id}`;
                 const {data} = await axios.put(url, {}, config);
+                console.log(data);
                 
                 setFetchAgain(!fetchAgain);
             } catch (error) {
@@ -110,6 +109,7 @@ const UpdateGroupChatModal = ({fetchAgain, setFetchAgain}) => {
                 chatId : selectedChat._id,
             }, config);
             
+            console.log(data);
             setFetchAgain(!fetchAgain);
             
         } catch (error) {

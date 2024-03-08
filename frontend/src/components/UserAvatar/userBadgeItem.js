@@ -1,5 +1,6 @@
 import React from "react";
-import {Box, Text, Avatar} from "@chakra-ui/react";
+import {Box} from "@chakra-ui/react";
+// import Box from "@chakra-ui/react";
 import { CloseIcon } from "@chakra-ui/icons";
 
 const UserListItem = ({user, handleFunction}) => {

@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import axios from "axios";
 import { useToast } from "@chakra-ui/react";
 
-import { Box, Text, Avatar, IconButton } from "@chakra-ui/react";
+import { Box, Text,  IconButton } from "@chakra-ui/react";
 import { ChatState } from "../../Context/ChatProvider";
 import { ArrowBackIcon } from "@chakra-ui/icons";
 import ProfileModel from "./profileModel";
@@ -13,7 +13,7 @@ import UpdateGroupChatModal from "./updateGroupChatModal";
 import io from "socket.io-client";
 
 
-const ENDPOINT = "http://localhost:5000";
+// const ENDPOINT = "http://localhost:5000";
 var socket, selectedChatCompare;
 
 
@@ -42,6 +42,7 @@ const SingleChat = ({fetchAgain, setFetchAgain}) => {
             };
 
             setLoading(true);
+            console.log(loading)
 
             const {data} = await axios.get(
                 `/api/chat/${selectedChat._id}`,
@@ -109,9 +110,12 @@ const SingleChat = ({fetchAgain, setFetchAgain}) => {
 
     }
 
+    console.log(sendMessage);
+
     useEffect(() => {
         fetchMessages();
         selectedChatCompare = selectedChat;
+        console.log("Selected chat changed", selectedChatCompare);
     }, [selectedChat]);
 
 
@@ -120,6 +124,7 @@ const SingleChat = ({fetchAgain, setFetchAgain}) => {
         socket.emit("join", { chat: selectedChat });
         socket.on("joined", () => {
             setSocketConnected(true);
+            console.log("Socket connected", socketConnected);
         });
     }, []);
 

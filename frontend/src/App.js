@@ -1,4 +1,5 @@
 import 'react-app-polyfill/stable';
+import 'react-app-polyfill/ie9';
 import { Route, Routes} from 'react-router-dom';
 import './App.css';
 import Home from './components/Pages/homePage';
