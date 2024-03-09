@@ -3,9 +3,12 @@ const asyncHandler = require('express-async-handler');
 const User = require('../models/userModel.js');
 
 const protect = asyncHandler(async (req, res, next) => {
+    console.log(req.headers.authorization);
+
     const token = req.headers.authorization?.split(' ')[1];
 
     try {
+        console.log(token);
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
         req.user = await User.findById(decoded.id).select('-password');

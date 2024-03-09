@@ -49,7 +49,8 @@ const accessChat = asyncHandler(async (req, res) => {
 
 const fetchChats = asyncHandler(async (req, res) => {
     try{
-
+        console.log("--------------------------------------------------------------------------------------------------")
+        console.log("here comes the request with user id", req.user._id)
         const chats = await Chat.find({
             users: { $elemMatch: { $eq: req.user._id } }
         }).populate('users', '-password')
@@ -172,6 +173,9 @@ const addToGroup = asyncHandler(async (req, res) => {
 const removeFromGroup = asyncHandler(async (req, res) => {
     var { chatId, userId } = req.body;
 
+    console.log("chatId", chatId);
+    console.log("userId", userId);
+
     if(!chatId || !userId) {
         res.status(400);
         throw new Error('Please fill all fields');
@@ -268,6 +272,8 @@ const deleteChat = asyncHandler(async (req, res) => {
 const leaveChat = asyncHandler(async (req, res) => {
     var { chatId } = req.body;
 
+    console.log("chatId", chatId);
+
     if(!chatId) {
         res.status(400);
         throw new Error('Please fill all fields');
@@ -279,6 +285,8 @@ const leaveChat = asyncHandler(async (req, res) => {
         isGroupChat: true,
         users: req.user._id
     });
+
+    console.log("isGroupChat", isGroupChat);
 
 
     if(isGroupChat.length > 0) {
@@ -293,6 +301,7 @@ const leaveChat = asyncHandler(async (req, res) => {
             console.log("user is group admin");
             //  change group admin to another random user 
             const users = await Chat.findById(chatId).select('users');
+            console.log("users", users[0])
 
             if(users[0] !== req.user._id) {
 

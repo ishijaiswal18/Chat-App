@@ -2,7 +2,7 @@ import React from "react";
 import { useState } from "react";
 import { useEffect } from "react";
 import axios from "axios";
-import { useToast } from "@chakra-ui/react";
+import { FormControl, Spinner, useToast } from "@chakra-ui/react";
 
 import { Box, Text,  IconButton } from "@chakra-ui/react";
 import { ChatState } from "../../Context/ChatProvider";
@@ -11,6 +11,8 @@ import ProfileModel from "./profileModel";
 import { getSender, getSenderFull} from "../../config/chatLogics";
 import UpdateGroupChatModal from "./updateGroupChatModal";
 import io from "socket.io-client";
+import { Input } from "@chakra-ui/react";
+import './style.css';
 
 
 // const ENDPOINT = "http://localhost:5000";
@@ -42,10 +44,9 @@ const SingleChat = ({fetchAgain, setFetchAgain}) => {
             };
 
             setLoading(true);
-            console.log(loading)
-
+            
             const {data} = await axios.get(
-                `/api/chat/${selectedChat._id}`,
+                `/api/message/${selectedChat._id}`,
                 config
             );
 
@@ -81,16 +82,17 @@ const SingleChat = ({fetchAgain, setFetchAgain}) => {
                     },
                 };
 
-                setNewMessage("");
+                
                 const {data} = await axios.post(
                     `/api/message`,
                     {
                         content: newMessage,
                         chatId: selectedChat._id,
-                        receivers: selectedChat.users,
                     },
                     config
                 );
+
+                setNewMessage("");
 
                 setMessages([...messages, data]);
                 socket.emit("messageSent", data);
@@ -109,6 +111,18 @@ const SingleChat = ({fetchAgain, setFetchAgain}) => {
         }
 
     }
+
+    const typingHandler = (e) => {
+        setNewMessage(e.target.value);
+
+        // if (e.key === "Enter" && !e.shiftKey && newMessage) {
+        //     socket.emit("typing", {
+        //         sender: userInfo._id,
+        //         chat: selectedChat._id,
+        //     });
+        // }
+    }
+
 
     console.log(sendMessage);
 
@@ -163,9 +177,8 @@ const SingleChat = ({fetchAgain, setFetchAgain}) => {
                                 <UpdateGroupChatModal
                                     fetchAgain = {fetchAgain}
                                     setFetchAgain = {setFetchAgain}
+                                    fetchMessages = {fetchMessages}
                                 />
-                                
-                                
                             </>
                             
                         )
@@ -183,7 +196,47 @@ const SingleChat = ({fetchAgain, setFetchAgain}) => {
                     overflowY = "hidden"
                     borderRadius = "lg"
                 >
-                    Messages
+                    {loading ? (
+                        <Spinner 
+                            size = "xl"
+                            color = "blue.500"
+                            alignSelf= "center"
+                            margin= "auto"
+                        />
+                    ) : 
+                    (
+                        messages.map((message) => (
+                            <Box
+                                key = {message._id}
+                                display = "flex"
+                                flexDirection = {message.sender === userInfo._id ? "row-reverse" : "row"}
+                                justifyContent = "flex-start"
+                                alignItems = "center"
+                                padding = "0.5rem"
+                            >
+                                <Box
+                                    padding = "0.5rem"
+                                    backgroundColor = {message.sender === userInfo._id ? "blue.500" : "gray.500"}
+                                    borderRadius = "lg"
+                                    color = "white"
+                                    maxWidth = "60%"
+                                    wordBreak = "break-all"
+                                >
+                                    {message.content}
+                                </Box>
+                            </Box>
+                        ))
+                    )} 
+
+                    <FormControl onKeyDown={sendMessage} isRequired marginTop={3}>
+                        <Input
+                            variant="filled"
+                            placeholder="Type a message"
+                            value={newMessage}
+                            onChange={typingHandler}
+                        />
+                    </FormControl> 
+                    
                 </Box>
                 </>
             ) : (

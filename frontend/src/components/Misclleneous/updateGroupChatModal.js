@@ -28,7 +28,7 @@ import UserListItem from '../UserAvatar/userListItem';
 import axios from 'axios';
 
 
-const UpdateGroupChatModal = ({fetchAgain, setFetchAgain}) => {
+const UpdateGroupChatModal = ({fetchAgain, setFetchAgain, fetchMessages}) => {
 
     const {isOpen, onClose, onOpen} = useDisclosure();
     const [groupChatName, setGroupChatName] = useState("");
@@ -43,19 +43,41 @@ const UpdateGroupChatModal = ({fetchAgain, setFetchAgain}) => {
 
     const toasts = useToast();
 
-    const handleRemove = (id) => {
+    const handleRemove = (userToRemove) => {
+        if (selectedChat.groupAdmin._id !== userInfo._id && userToRemove._id !== userInfo._id) {
+            toasts({
+                title: "Not Admin",
+                description: "You are not the admin of the group",
+                status: "error",
+                duration: 2000,
+                isClosable: true,
+            });
+            return;
+        }
+
         return async () => {
             try {
+                setLoading(true);
                 const config = {
                     headers: {
-                        Authorization: `Bearer ${user.token}`,
+                        Authorization: `Bearer ${userInfo.token}`,
                     },
                 };
-                const url = `/api/chat/${selectedChat._id}/remove/${id}`;
-                const {data} = await axios.put(url, {}, config);
+                const url = `/api/chat/groupremove`;
+                const {data} = await axios.put(url,
+                    {
+                        chatId: selectedChat._id,
+                        userId: userToRemove._id,
+                    },
+                    config);
                 console.log(data);
+
+                userToRemove._id === userInfo._id ? setSelectedChat() : setSelectedChat(data);
+
                 
                 setFetchAgain(!fetchAgain);
+                fetchMessages();
+                setLoading(false);
             } catch (error) {
                 toasts({
                     title: "Error",
@@ -64,10 +86,57 @@ const UpdateGroupChatModal = ({fetchAgain, setFetchAgain}) => {
                     duration: 2000,
                     isClosable: true,
                 });
+                setLoading(false);
             }
         }
     }
 
+
+    const LeaveGroup = async () => {
+        try {
+            setLoading(true);
+            // `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY0MmNhOTRhNjFmZWJlMTJlODNmZTYwNCIsImlhdCI6MTcxMDAwNzU2NSwiZXhwIjoxNzEyNTk5NTY1fQ.EnW-3_j28__3kTC2AapWs2ibOCRY54EbdvEZft4b9wQ`
+                const config = {
+                    headers: {
+                        Authorization: `Bearer ${userInfo.token}`,
+                    },
+                };
+
+            console.log("config", config);
+            
+            const url = `/api/chat/leave`;
+
+            const {data} = await axios.delete(url,
+                {
+                    chatId: selectedChat._id,
+                },
+                {
+                    headers: {
+                        Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY0MmNhOTRhNjFmZWJlMTJlODNmZTYwNCIsImlhdCI6MTcxMDAwNzU2NSwiZXhwIjoxNzEyNTk5NTY1fQ.EnW-3_j28__3kTC2AapWs2ibOCRY54EbdvEZft4b9wQ`,
+
+                    }
+                }
+                );
+
+
+            
+            console.log(data);
+            setFetchAgain(!fetchAgain);
+            setLoading(false);
+            
+        } catch (error) {
+            console.log(error);
+            console.log(error.response);
+            toasts({
+                title: "Error",
+                description: "Something went wrong",
+                status: "error",
+                duration: 2000,
+                isClosable: true,
+            });
+            setLoading(false);
+        }
+    }
     const handleRename = async () => {
         if(groupChatName === "") return;
         try {
@@ -95,34 +164,10 @@ const UpdateGroupChatModal = ({fetchAgain, setFetchAgain}) => {
 
             setRenameLoading(false);
         }
+
+        setGroupChatName("");
     }
 
-    const LeaveGroup = async () => {
-        try {
-            const config = {
-                headers: {
-                    Authorization: `Bearer ${userInfo.token}`,
-                },
-            };
-            const url = `/api/chat/leave`;
-            const {data} = await axios.put(url, {
-                chatId : selectedChat._id,
-            }, config);
-            
-            console.log(data);
-            setFetchAgain(!fetchAgain);
-            
-        } catch (error) {
-            console.log(error);
-            toasts({
-                title: "Error",
-                description: "Something went wrong",
-                status: "error",
-                duration: 2000,
-                isClosable: true,
-            });
-        }
-    }
 
     const handleSearch = async (value) => {
         if(value === "") return;
@@ -145,10 +190,11 @@ const UpdateGroupChatModal = ({fetchAgain, setFetchAgain}) => {
         } catch (error) {
             toasts({
                 title: "Error",
-                description: "Something went wrong",
+                description: "Failed to search user",
                 status: "error",
                 duration: 2000,
                 isClosable: true,
+                position: "bottom-left",
             });
 
             setLoading(false);
@@ -209,7 +255,11 @@ const UpdateGroupChatModal = ({fetchAgain, setFetchAgain}) => {
                 duration: 2000,
                 isClosable: true,
             });
+
+            setLoading(false);
         }
+
+        
     }
 
 
@@ -255,7 +305,8 @@ const UpdateGroupChatModal = ({fetchAgain, setFetchAgain}) => {
                             <UserBadgeItem
                                 key = {user._id}
                                 user = {user}
-                                handleFunction = {handleRemove(user._id)}
+                                admin = {selectedChat.groupAdmin}
+                                handleFunction = {handleRemove(user)}
                             />
                         ))}
                     </Box>
