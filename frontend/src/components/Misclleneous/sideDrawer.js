@@ -30,6 +30,13 @@ import {
 
 } from "@chakra-ui/react";
 import { useDisclosure } from "@chakra-ui/hooks";
+import realSocketLogo from "../../images/LogoSample_ByTailorBrands (1)-removebg-preview.jpg";
+import { Image } from "@chakra-ui/react";
+import { isSameSender, isLastMessage, isSameUser, isSameSenderMargin, getSender} from "../../config/chatLogics";
+import NotificationBadge from "react-notification-badge";
+import { Effect } from "react-notification-badge";
+
+
 
 const SideDrawer = () => {
 
@@ -167,14 +174,47 @@ const SideDrawer = () => {
 
                 </Tooltip>
 
-                <Text fontSize="2xl" color="teal" textAlign="right" fontWeight="bold" fontFamily="Work Sans">
-                    Aur Bataoo
-                </Text>
+                <Box>
+                    <Image src={realSocketLogo} alt="Real Socket Logo"width="120px" height="60px" mr = "2"/>
+
+                    {/* <Text fontSize="2xl" color="teal" fontWeight="bold" fontFamily="Work Sans">
+                
+                
+                        RealSocket
+                    </Text> */}
+                </Box>
 
                 <div>
                     <Menu>
-                        <MenuButton as={IconButton} aria-label="Options" icon={<BellIcon fontSize="2x" margin="1px" />} variant="ghost" size="md" />
-                        {/* <MenuList> </MenuList> */}
+                        {/* <MenuButton as={IconButton} aria-label="Options" icon={<BellIcon fontSize="2x" margin="1px" />} variant="ghost" size="md" /> */}
+                        <MenuButton p={1}>
+                        <NotificationBadge
+                            count={notification.length}
+                            effect={Effect.SCALE}
+                        />
+                        <BellIcon fontSize="2xl" m={1} />
+                        </MenuButton>
+                        <MenuList
+                            pl = {2}
+                        > 
+                            {!notification.length && "No new messages"}
+                            {notification.map((notif) => (
+                                <MenuItem 
+                                    key = {notif._id}
+                                    onClick = {() => {
+                                        setSelectedChat(notif.chat);
+                                        setNotification(notification.filter((n) =>
+                                            n !== notif
+                                        ));
+                                    }}
+                                >
+                                    {notif.chat.isGroupChat
+                                        ? `New Message in ${notif.chat.chatName}`
+                                        : `New Message from ${getSender(user, notif.chat.users)}`
+                                    }
+                                </MenuItem>
+                            ))}
+                        </MenuList>
                     </Menu>
                     <Menu>
                         <MenuButton as={Button} aria-label="Options" rightIcon={<ChevronDownIcon fontSize="2x" margin="1px" />} variant="ghost" size="md">

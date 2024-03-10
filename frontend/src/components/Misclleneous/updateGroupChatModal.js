@@ -26,6 +26,7 @@ import { useToast } from '@chakra-ui/react';
 import UserBadgeItem from '../UserAvatar/userBadgeItem';
 import UserListItem from '../UserAvatar/userListItem';
 import axios from 'axios';
+import ScrollableFeed from 'react-scrollable-feed';
 
 
 const UpdateGroupChatModal = ({fetchAgain, setFetchAgain, fetchMessages}) => {
@@ -106,22 +107,19 @@ const UpdateGroupChatModal = ({fetchAgain, setFetchAgain, fetchMessages}) => {
             
             const url = `/api/chat/leave`;
 
-            const {data} = await axios.delete(url,
+            const {data} = await axios.put(url,
                 {
                     chatId: selectedChat._id,
                 },
-                {
-                    headers: {
-                        Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY0MmNhOTRhNjFmZWJlMTJlODNmZTYwNCIsImlhdCI6MTcxMDAwNzU2NSwiZXhwIjoxNzEyNTk5NTY1fQ.EnW-3_j28__3kTC2AapWs2ibOCRY54EbdvEZft4b9wQ`,
-
-                    }
-                }
+                config
                 );
 
 
             
             console.log(data);
+            setSelectedChat();
             setFetchAgain(!fetchAgain);
+            fetchMessages();
             setLoading(false);
             
         } catch (error) {
@@ -346,20 +344,15 @@ const UpdateGroupChatModal = ({fetchAgain, setFetchAgain, fetchMessages}) => {
                             size = "xl"
                         />
                     ) : (   
-                        <Box
-                            display = "flex"
-                            flexWrap= "wrap"
-                            paddingBottom = "1rem"
-                            width= "100%"
-                        >
-                            { searchResult?.slice(0, 3).map((user) => (
+                        <ScrollableFeed>
+                            {searchResult.map((user) => (
                                 <UserListItem
                                     key = {user._id}
                                     user = {user}
-                                    handleFunction = {() => handleAddUser(user)}
+                                    handleFunction = {handleAddUser}
                                 />
                             ))}
-                        </Box>
+                        </ScrollableFeed>
                     )}
 
                 </ModalBody>

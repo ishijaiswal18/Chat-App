@@ -55,10 +55,39 @@ const io = require('socket.io')(server, {
 io.on('connection', (socket) => {
   console.log('Socket connected');
 
-  socket.on('join', ({ chatId }) => {
-    socket.join(chatId);
-    socket.emit('joined', { chatId });
-    console.log('Joined room', chatId);
+  socket.on("setup", (userData) => {
+    socket.join(userData._id);
+    console.log('User connected', userData._id);
+    socket.emit("connected");
+  });
+
+  socket.on('join', (room) => {
+    socket.join(room);
+    socket.emit('joined', room);
+    console.log('Joined room', room);
+  });
+
+  socket.on("typing", (room) => {
+    socket.in(room).emit("typing");
+  });
+
+  socket.on("stopTyping", (room) => {
+    socket.in(room).emit("stopTyping");
+  });
+
+ 
+  socket.on('sendMessage', (message) => {
+    if (message.context && message.chat) {
+      const chat = message.chat;
+      const receivers = message.sender;
+      const context = message.context;
+
+      chat.users.forEach((user) => {
+        if (user !== message.sender) {
+          socket.in(user._id).emit('receiveMessage', message);
+        }
+      });
+    }
   });
 
 

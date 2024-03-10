@@ -1,4 +1,4 @@
-.messages {
+/* .messages {
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -13,4 +13,11 @@
     font-weight: bold;
     text-align: center;
     width: 100%;
-}
+} */
+
+.messages {
+    display: flex;
+    flex-direction: column;
+    overflow-y: scroll;
+    scrollbar-width: none;
+  }
